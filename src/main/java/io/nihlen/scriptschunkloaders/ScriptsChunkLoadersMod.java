@@ -2,6 +2,13 @@ package io.nihlen.scriptschunkloaders;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleFactory;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleRegistry;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.BlockView;
+import net.minecraft.world.ChunkRegion;
+import net.minecraft.world.GameRules;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,6 +21,8 @@ public class ScriptsChunkLoadersMod implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 	public static final ChunkLoaderManager CHUNK_LOADER_MANAGER = new ChunkLoaderManager();
 
+    public static final GameRules.Key<GameRules.BooleanRule> SHOULD_DEFAULT_RENAME_LOADERS = GameRuleRegistry.register("shouldDefaultRenameLoaders", GameRules.Category.MISC, GameRuleFactory.createBooleanRule(true));
+
 	@Override
 	public void onInitialize() {
 		// This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -22,4 +31,16 @@ public class ScriptsChunkLoadersMod implements ModInitializer {
 
 		ServerLifecycleEvents.SERVER_STARTED.register(CHUNK_LOADER_MANAGER::initialize);
 	}
+
+    public static boolean shouldDefaultRenameLoaders(BlockView world) {
+        if (world instanceof ServerWorld serverWorld) {
+            return serverWorld.getGameRules().getBoolean(SHOULD_DEFAULT_RENAME_LOADERS);
+        }
+        else if (world instanceof ChunkRegion chunkRegion) {
+            MinecraftServer server = chunkRegion.getServer();
+            return server != null && server.getGameRules().getBoolean(SHOULD_DEFAULT_RENAME_LOADERS);
+        }
+
+        return true;
+    }
 }
