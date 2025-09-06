@@ -70,7 +70,6 @@ public class DispenserBlockMixin {
 
             if (cart.scripts_chunk_loaders$isChunkLoader()) {
                 cart.scripts_chunk_loaders$stopChunkLoader();
-                world.emitGameEvent(GameEvent.RESONATE_1, entity.getPos(), GameEvent.Emitter.of(entity));
 
                 stoppedLoader = true;
             } else {
