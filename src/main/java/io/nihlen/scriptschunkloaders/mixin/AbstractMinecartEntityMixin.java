@@ -70,15 +70,13 @@ public abstract class AbstractMinecartEntityMixin extends Entity implements Mine
 			}
 		}
 
-        if (ScriptsChunkLoadersMod.shouldDefaultRenameLoaders(getWorld())) {
-            scripts_chunk_loaders$setChunkLoaderName("Chunk Loader");
-        }
+        scripts_chunk_loaders$setChunkLoaderName("Chunk Loader");
 	}
 
 	public void scripts_chunk_loaders$setChunkLoaderName(String name) {
 		var nameText = Text.literal(name);
 		this.setCustomName(nameText);
-		this.setCustomNameVisible(true);
+		this.setCustomNameVisible(ScriptsChunkLoadersMod.isCustomNameVisible(getWorld()));
 	}
 
 	public void scripts_chunk_loaders$stopChunkLoader() {

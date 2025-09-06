@@ -21,7 +21,7 @@ public class ScriptsChunkLoadersMod implements ModInitializer {
 	public static final Logger LOGGER = LoggerFactory.getLogger(MODID);
 	public static final ChunkLoaderManager CHUNK_LOADER_MANAGER = new ChunkLoaderManager();
 
-    public static final GameRules.Key<GameRules.BooleanRule> SHOULD_DEFAULT_RENAME_LOADERS = GameRuleRegistry.register("shouldDefaultRenameLoaders", GameRules.Category.MISC, GameRuleFactory.createBooleanRule(true));
+    public static final GameRules.Key<GameRules.BooleanRule> ALWAYS_SHOW_LOADER_NAME = GameRuleRegistry.register("alwaysShowLoaderName", GameRules.Category.MISC, GameRuleFactory.createBooleanRule(true));
 
 	@Override
 	public void onInitialize() {
@@ -32,13 +32,22 @@ public class ScriptsChunkLoadersMod implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STARTED.register(CHUNK_LOADER_MANAGER::initialize);
 	}
 
-    public static boolean shouldDefaultRenameLoaders(BlockView world) {
-        if (world instanceof ServerWorld serverWorld) {
-            return serverWorld.getGameRules().getBoolean(SHOULD_DEFAULT_RENAME_LOADERS);
-        }
-        else if (world instanceof ChunkRegion chunkRegion) {
+    public static boolean isCustomNameVisible(BlockView world) {
+        GameRules rules = null;
+
+        if (world instanceof ServerWorld serverWorld)
+            rules = serverWorld.getGameRules();
+        else if (world instanceof ChunkRegion chunkRegion)
+        {
             MinecraftServer server = chunkRegion.getServer();
-            return server != null && server.getGameRules().getBoolean(SHOULD_DEFAULT_RENAME_LOADERS);
+
+            if (server != null) {
+                rules = server.getGameRules();
+            }
+        }
+
+        if (rules != null) {
+            return rules.getBoolean(ALWAYS_SHOW_LOADER_NAME);
         }
 
         return true;
