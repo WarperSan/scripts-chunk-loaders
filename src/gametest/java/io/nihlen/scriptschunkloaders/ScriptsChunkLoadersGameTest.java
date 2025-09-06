@@ -1,19 +1,15 @@
 package io.nihlen.scriptschunkloaders;
 
 import net.fabricmc.fabric.api.gametest.v1.GameTest;
-
 import net.minecraft.block.entity.SculkSensorBlockEntity;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.state.property.IntProperty;
-import net.minecraft.state.property.Properties;
 import net.minecraft.test.TestContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
-
 import java.util.Objects;
 import java.util.function.Function;
 
@@ -49,6 +45,7 @@ import java.util.function.Function;
 * - Minecart unregisters with sculk sensor
 * */
 
+@SuppressWarnings("unused")
 public class ScriptsChunkLoadersGameTest {
     String defaultName = "Chunk Loader";
     String customItemName = "My Custom Item";
