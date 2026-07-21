@@ -360,13 +360,13 @@ public class ScriptsChunkLoadersGameTest {
         });
     }
 
+    /// Checks if the sculk sensor receives the correct vibration on activation
     @GameTest(structure = "scl_tests:sculk_activate")
     public void registerWithResonance(GameTestHelper context) {
         clearTest(context);
 
         context.spawn(EntityTypes.MINECART, 2, 1, 2);
         context.setBlock(new BlockPos(3, 1, 2), Blocks.AIR);
-        //context.removeBlock(new BlockPos(3, 1, 2));
         context.pulseRedstone(new BlockPos(1, 1, 1), 1);
 
         context.runAfterDelay(15, () -> {
@@ -391,6 +391,7 @@ public class ScriptsChunkLoadersGameTest {
         });
     }
 
+    /// Checks if the sculk sensor receives the correct vibration on deactivation
     @GameTest(structure = "scl_tests:sculk_activate")
     public void unregisterWithResonance(GameTestHelper context) {
         clearTest(context);
@@ -401,7 +402,6 @@ public class ScriptsChunkLoadersGameTest {
         context.runAfterDelay(4, () -> {
             context.assertEntityData(new BlockPos(2, 1, 2), EntityTypes.MINECART, getCustomName, defaultName);
             context.setBlock(new BlockPos(3, 1, 2), Blocks.AIR);
-            //context.removeBlock(new BlockPos(3, 1, 2));
 
             context.runAfterDelay(4, () -> {
                 context.pulseRedstone(new BlockPos(1, 1, 1), 1);

@@ -57,7 +57,7 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 		this.isChunkLoader = true;
 
 		ScriptsChunkLoadersMod.LOGGER.info(
-                "Starting chunk loader '{}' (ID: {}) at ({}, {}, {}) in {}",
+                "Starting chunk loader '{}' (ID: {}) at ({}, {}, {}) in '{}'",
                 this.getName().getString(),
                 (Object) this.getId(),
                 (Object) this.getX(),
@@ -100,7 +100,7 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 	@Unique
 	public void scripts_chunk_loaders$stopChunkLoader(boolean keepName) {
 		ScriptsChunkLoadersMod.LOGGER.info(
-                "Stopping chunk loader '{}' (ID: {}) at ({}, {}, {}) in {}",
+                "Stopping chunk loader '{}' (ID: {}) at ({}, {}, {}) in '{}'",
                 this.getName().getString(),
                 (Object) this.getId(),
                 (Object) this.getX(),
