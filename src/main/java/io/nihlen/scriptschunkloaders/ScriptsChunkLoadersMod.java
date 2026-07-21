@@ -2,9 +2,13 @@ package io.nihlen.scriptschunkloaders;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
+import net.fabricmc.fabric.api.gamerule.v1.GameRuleBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.TicketType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.gamerules.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +23,7 @@ public class ScriptsChunkLoadersMod implements ModInitializer {
 	// Add Custom TicketType, Flags are set to mimic FORCED.
 	public static final TicketType CUSTOM_TICKETTYPE_FORCED =  Registry.register(BuiltInRegistries.TICKET_TYPE, ScriptsChunkLoadersMod.MODID, new TicketType(TicketType.NO_TIMEOUT, TicketType.FLAG_PERSIST | TicketType.FLAG_LOADING | TicketType.FLAG_SIMULATION | TicketType.FLAG_KEEP_DIMENSION_ACTIVE));
 
-    public static final GameRules.Key<GameRules.BooleanRule> ALWAYS_SHOW_LOADER_NAME = GameRuleRegistry.register("alwaysShowLoaderName", GameRules.Category.MISC, GameRuleFactory.createBooleanRule(true));
+    public static final GameRule<Boolean> ALWAYS_SHOW_LOADER_NAME = Registry.register(BuiltInRegistries.GAME_RULE, "alwaysShowLoaderName", GameRuleBuilder.forBoolean(true).category(GameRuleCategory.MISC).build());
 
 	@Override
 	public void onInitialize() {
@@ -30,24 +34,12 @@ public class ScriptsChunkLoadersMod implements ModInitializer {
 		ServerLifecycleEvents.SERVER_STARTED.register(CHUNK_LOADER_MANAGER::initialize);
 	}
 
-    public static boolean isCustomNameVisible(BlockView world) {
-        GameRules rules = null;
+    public static boolean isCustomNameVisible(Level level) {
+        MinecraftServer server = level.getServer();
 
-        if (world instanceof ServerWorld serverWorld)
-            rules = serverWorld.getGameRules();
-        else if (world instanceof ChunkRegion chunkRegion)
-        {
-            MinecraftServer server = chunkRegion.getServer();
+        if (server == null)
+            return true;
 
-            if (server != null) {
-                rules = server.getGameRules();
-            }
-        }
-
-        if (rules != null) {
-            return rules.getBoolean(ALWAYS_SHOW_LOADER_NAME);
-        }
-
-        return true;
+        return server.getGameRules().get(ALWAYS_SHOW_LOADER_NAME);
     }
 }

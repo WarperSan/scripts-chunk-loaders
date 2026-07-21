@@ -82,7 +82,7 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 	public void scripts_chunk_loaders$setChunkLoaderName(String name) {
 		var nameText = Component.literal(name);
 		this.setCustomName(nameText);
-		this.setCustomNameVisible(ScriptsChunkLoadersMod.isCustomNameVisible(getWorld()));
+		this.setCustomNameVisible(ScriptsChunkLoadersMod.isCustomNameVisible(level()));
 	}
 
 	public void scripts_chunk_loaders$stopChunkLoader() {

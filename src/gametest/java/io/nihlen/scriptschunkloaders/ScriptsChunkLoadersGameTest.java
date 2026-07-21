@@ -10,6 +10,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.gametest.framework.GameTestHelper;
 import net.minecraft.network.chat.Component;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.entity.SculkSensorBlockEntity;
 
 import java.util.Objects;
 import java.util.function.Function;
@@ -359,68 +361,70 @@ public class ScriptsChunkLoadersGameTest {
     }
 
     @GameTest(structure = "scl_tests:sculk_activate")
-    public void registerWithResonance(TestContext context) {
+    public void registerWithResonance(GameTestHelper context) {
         clearTest(context);
 
-        context.spawnEntity(EntityType.MINECART, 2, 1, 2);
-        context.removeBlock(new BlockPos(3, 1, 2));
-        context.putAndRemoveRedstoneBlock(new BlockPos(1, 1, 1), 1);
+        context.spawn(EntityTypes.MINECART, 2, 1, 2);
+        context.setBlock(new BlockPos(3, 1, 2), Blocks.AIR);
+        //context.removeBlock(new BlockPos(3, 1, 2));
+        context.pulseRedstone(new BlockPos(1, 1, 1), 1);
 
-        context.waitAndRun(15, () -> {
+        context.runAfterDelay(15, () -> {
             BlockPos pos = new BlockPos( 4, 1, 2);
             SculkSensorBlockEntity sensor = context.getBlockEntity(pos, SculkSensorBlockEntity.class);
 
             if (sensor.getLastVibrationFrequency() != startLoaderFrequency) {
-                throw context.createError(pos, String.format(
+                throw context.assertionException(pos, String.format(
                         "Expected a vibration frequency of %s, instead got %s",
                         startLoaderFrequency,
                         sensor.getLastVibrationFrequency()
                 ));
             }
 
-            context.expectEntityWithData(
+            context.assertEntityData(
                     new BlockPos(2, 1, 2),
-                    EntityType.MINECART,
+                    EntityTypes.MINECART,
                     getCustomName,
                     defaultName
             );
-            context.complete();
+            context.succeed();
         });
     }
 
     @GameTest(structure = "scl_tests:sculk_activate")
-    public void unregisterWithResonance(TestContext context) {
+    public void unregisterWithResonance(GameTestHelper context) {
         clearTest(context);
 
-        context.spawnEntity(EntityType.MINECART, 2, 1, 2);
-        context.putAndRemoveRedstoneBlock(new BlockPos(1, 1, 1), 1);
+        context.spawn(EntityTypes.MINECART, 2, 1, 2);
+        context.pulseRedstone(new BlockPos(1, 1, 1), 1);
 
-        context.waitAndRun(4, () -> {
-            context.expectEntityWithData(new BlockPos(2, 1, 2), EntityType.MINECART, getCustomName, defaultName);
-            context.removeBlock(new BlockPos(3, 1, 2));
+        context.runAfterDelay(4, () -> {
+            context.assertEntityData(new BlockPos(2, 1, 2), EntityTypes.MINECART, getCustomName, defaultName);
+            context.setBlock(new BlockPos(3, 1, 2), Blocks.AIR);
+            //context.removeBlock(new BlockPos(3, 1, 2));
 
-            context.waitAndRun(4, () -> {
-                context.putAndRemoveRedstoneBlock(new BlockPos(1, 1, 1), 1);
+            context.runAfterDelay(4, () -> {
+                context.pulseRedstone(new BlockPos(1, 1, 1), 1);
 
-                context.waitAndRun(8, () -> {
+                context.runAfterDelay(8, () -> {
                     BlockPos pos = new BlockPos( 4, 1, 2);
                     SculkSensorBlockEntity sensor = context.getBlockEntity(pos, SculkSensorBlockEntity.class);
 
                     if (sensor.getLastVibrationFrequency() != stopLoaderFrequency) {
-                        throw context.createError(pos, String.format(
+                        throw context.assertionException(pos, String.format(
                                 "Expected a vibration frequency of %s, instead got %s",
                                 stopLoaderFrequency,
                                 sensor.getLastVibrationFrequency()
                         ));
                     }
 
-                    context.expectEntityWithData(
+                    context.assertEntityData(
                             new BlockPos(2, 1, 2),
-                            EntityType.MINECART,
+                            EntityTypes.MINECART,
                             getCustomName,
                             null
                     );
-                    context.complete();
+                    context.succeed();
                 });
             });
         });
