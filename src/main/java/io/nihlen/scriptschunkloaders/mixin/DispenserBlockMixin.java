@@ -31,16 +31,16 @@ public class DispenserBlockMixin {
             cancellable = true
     )
 
-    private void dispense(ServerLevel world, BlockState state, BlockPos pos, CallbackInfo info) {
-        if (world.isClientSide()) return;
+    private void dispense(ServerLevel level, BlockState state, BlockPos pos, CallbackInfo info) {
+        if (level.isClientSide()) return;
 
-        DispenserBlockEntity dispenserBlockEntity = world.getBlockEntity(pos, BlockEntityTypes.DISPENSER).orElse(null);
+        DispenserBlockEntity dispenserBlockEntity = level.getBlockEntity(pos, BlockEntityTypes.DISPENSER).orElse(null);
         if (dispenserBlockEntity == null) return;
 
         String action = this.getAction(dispenserBlockEntity);
         if (action == null) return;
 
-        this.applyChunkLoaderAction(world, state, pos, action);
+        this.applyChunkLoaderAction(level, state, pos, action);
 
         info.cancel();
     }

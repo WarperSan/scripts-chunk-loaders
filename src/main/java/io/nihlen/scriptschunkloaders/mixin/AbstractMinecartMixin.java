@@ -9,6 +9,7 @@ import net.minecraft.world.entity.vehicle.minecart.MinecartChest;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.level.portal.TeleportTransition;
+import org.jspecify.annotations.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -72,7 +73,7 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 		if (minecartType == EntityTypes.CHEST_MINECART) {
 			//noinspection DataFlowIssue - We're sure this is a chest because of the if statement.
 			var entity = (MinecartChest)(Object)this;
-			var firstSlot = entity.getItemStacks().get(0);
+			var firstSlot = entity.getItemStacks().getFirst();
 
 			var hasCustomName = firstSlot.get(DataComponents.CUSTOM_NAME) != null;
 			
@@ -119,13 +120,13 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 	}
 
 	@Inject(method = "addAdditionalSaveData", at = @At("RETURN"))
-	public void writeCustomData(ValueOutput view, CallbackInfo ci) {
-		view.putBoolean("chunkLoader", this.isChunkLoader);
+	public void writeCustomData(ValueOutput output, CallbackInfo ci) {
+		output.putBoolean("chunkLoader", this.isChunkLoader);
 	}
 
 	@Inject(method = "readAdditionalSaveData", at = @At("RETURN"))
-	public void readCustomData(ValueInput view, CallbackInfo ci) {
-		this.isChunkLoader = view.getBooleanOr("chunkLoader", false);
+	public void readCustomData(ValueInput input, CallbackInfo ci) {
+		this.isChunkLoader = input.getBooleanOr("chunkLoader", false);
 	}
 
 	@Inject(method = "tick", at = @At("TAIL"))
@@ -143,7 +144,7 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 	}
 
 	@Override
-	public void remove(Entity.RemovalReason reason) {
+	public void remove(Entity.@NonNull RemovalReason reason) {
 		if (isChunkLoader) {
 			this.scripts_chunk_loaders$stopChunkLoader();
 		}
@@ -152,7 +153,7 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 	}
 
 	@Override
-	public Entity teleport(TeleportTransition teleportTarget) {
+	public Entity teleport(@NonNull TeleportTransition teleportTarget) {
 		var wasChunkLoader = isChunkLoader;
 		if (wasChunkLoader)
 			this.scripts_chunk_loaders$stopChunkLoader(true);

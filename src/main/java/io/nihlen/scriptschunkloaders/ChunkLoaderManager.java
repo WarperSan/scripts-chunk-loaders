@@ -49,7 +49,7 @@ public class ChunkLoaderManager {
         removeChunkLoader(entity);
         ScriptsChunkLoadersMod.LOGGER.debug("Adding {} to {}", entity, dimension.identifier());
 
-        var worldChunks = forceLoadedChunks.computeIfAbsent(dimension, s -> new HashMap<>());
+        var worldChunks = forceLoadedChunks.computeIfAbsent(dimension, _ -> new HashMap<>());
         var list = worldChunks.computeIfAbsent(chunkPos.pack(), s -> new ArrayList<>());
         list.add(entity.getUUID());
     }
