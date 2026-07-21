@@ -92,40 +92,40 @@ public class DispenserBlockMixin {
     }
 
     @Unique
-    private void applyChunkLoaderAction(ServerLevel world, BlockState state, BlockPos pos, String action) {
+    private void applyChunkLoaderAction(ServerLevel level, BlockState state, BlockPos pos, String action) {
         BlockPos blockPos = pos.relative(state.getValue(DispenserBlock.FACING));
-        List<AbstractMinecart> list = world.getEntitiesOfClass(AbstractMinecart.class, new AABB(blockPos), EntitySelector.ENTITY_STILL_ALIVE);
+        List<AbstractMinecart> list = level.getEntitiesOfClass(AbstractMinecart.class, new AABB(blockPos), EntitySelector.ENTITY_STILL_ALIVE);
 
         for (AbstractMinecart entity : list) {
             MinecartEntityExt cart = (MinecartEntityExt)entity;
 
             switch (action) {
-                case "toggle" -> this.toggleCart(world, state, pos, cart);
-                case "start" -> this.startCart(world, state, pos, cart);
-                case "stop" -> this.stopCart(world, state, pos, cart);
+                case "toggle" -> this.toggleCart(level, entity, cart);
+                case "start" -> this.startCart(level, entity, cart);
+                case "stop" -> this.stopCart(level, entity, cart);
             }
         }
     }
 
     @Unique
-    private void toggleCart(ServerLevel world, BlockState state, BlockPos pos, MinecartEntityExt cart) {
+    private void toggleCart(ServerLevel level, AbstractMinecart entity, MinecartEntityExt cart) {
         if (cart.scripts_chunk_loaders$isChunkLoader()) {
-            this.stopCart(world, state, pos, cart);
+            this.stopCart(level, entity, cart);
         } else {
-            this.startCart(world, state, pos, cart);
+            this.startCart(level, entity, cart);
         }
     }
 
     @Unique
-    private void startCart(ServerLevel world, BlockState state, BlockPos pos, MinecartEntityExt cart) {
+    private void startCart(ServerLevel level, AbstractMinecart entity, MinecartEntityExt cart) {
         cart.scripts_chunk_loaders$startChunkLoader();
         cart.scripts_chunk_loaders$setChunkLoaderNameFromInventory();
-        world.gameEvent(GameEvent.RESONATE_6, pos, GameEvent.Context.of(state));
+        level.gameEvent(entity, GameEvent.RESONATE_6, entity.position());
     }
 
     @Unique
-    private void stopCart(ServerLevel world, BlockState state, BlockPos pos, MinecartEntityExt cart) {
+    private void stopCart(ServerLevel level, AbstractMinecart entity, MinecartEntityExt cart) {
         cart.scripts_chunk_loaders$stopChunkLoader();
-        world.gameEvent(GameEvent.RESONATE_5, pos, GameEvent.Context.of(state));
+        level.gameEvent(entity, GameEvent.RESONATE_5, entity.position());
     }
 }
