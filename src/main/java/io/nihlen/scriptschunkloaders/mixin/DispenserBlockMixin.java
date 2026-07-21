@@ -12,6 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -99,30 +100,32 @@ public class DispenserBlockMixin {
             MinecartEntityExt cart = (MinecartEntityExt)entity;
 
             switch (action) {
-                case "toggle" -> this.toggleCart(cart);
-                case "start" -> this.startCart(cart);
-                case "stop" -> this.stopCart(cart);
+                case "toggle" -> this.toggleCart(world, state, pos, cart);
+                case "start" -> this.startCart(world, state, pos, cart);
+                case "stop" -> this.stopCart(world, state, pos, cart);
             }
         }
     }
 
     @Unique
-    private void toggleCart(MinecartEntityExt cart) {
+    private void toggleCart(ServerLevel world, BlockState state, BlockPos pos, MinecartEntityExt cart) {
         if (cart.scripts_chunk_loaders$isChunkLoader()) {
-            this.stopCart(cart);
+            this.stopCart(world, state, pos, cart);
         } else {
-            this.startCart(cart);
+            this.startCart(world, state, pos, cart);
         }
     }
 
     @Unique
-    private void startCart(MinecartEntityExt cart) {
+    private void startCart(ServerLevel world, BlockState state, BlockPos pos, MinecartEntityExt cart) {
         cart.scripts_chunk_loaders$startChunkLoader();
         cart.scripts_chunk_loaders$setChunkLoaderNameFromInventory();
+        world.gameEvent(GameEvent.RESONATE_6, pos, GameEvent.Context.of(state));
     }
 
     @Unique
-    private void stopCart(MinecartEntityExt cart) {
+    private void stopCart(ServerLevel world, BlockState state, BlockPos pos, MinecartEntityExt cart) {
         cart.scripts_chunk_loaders$stopChunkLoader();
+        world.gameEvent(GameEvent.RESONATE_5, pos, GameEvent.Context.of(state));
     }
 }
