@@ -1,5 +1,6 @@
 package io.nihlen.scriptschunkloaders.mixin;
 
+import io.nihlen.scriptschunkloaders.ScriptsChunkLoadersGameRules;
 import net.minecraft.core.component.DataComponents;
 //import net.minecraft.entity.vehicle.*;
 import net.minecraft.world.entity.EntityTypes;
@@ -88,7 +89,7 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 	public void scripts_chunk_loaders$setChunkLoaderName(String name) {
 		var nameText = Component.literal(name);
 		this.setCustomName(nameText);
-		this.setCustomNameVisible(ScriptsChunkLoadersMod.isCustomNameVisible(level()));
+		this.setCustomNameVisible(ScriptsChunkLoadersGameRules.shouldAlwaysShowCustomName(this));
 	}
 
 	public void scripts_chunk_loaders$stopChunkLoader() {
