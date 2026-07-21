@@ -26,7 +26,6 @@ import java.util.List;
 
 @Mixin(DispenserBlock.class)
 public class DispenserBlockMixin {
-    @Shadow @Final private static Logger LOGGER;
 
     @Inject(
             at = @At("HEAD"),
