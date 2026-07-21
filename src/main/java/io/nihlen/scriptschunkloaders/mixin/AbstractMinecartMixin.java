@@ -34,8 +34,6 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 	@Unique
 	private int particleTicker = 0;
 	@Unique
-	private final int particleInterval = 3;
-	@Unique
 	private ChunkPos lastChunkPos = null;
 
 	public AbstractMinecartMixin(EntityType<?> type, Level world) {
@@ -154,7 +152,7 @@ public abstract class AbstractMinecartMixin extends Entity implements MinecartEn
 	@Unique
 	private void tickParticles() {
 		this.particleTicker += 1;
-		if (this.particleTicker >= particleInterval) {
+		if (this.particleTicker >= 3) {
 			this.particleTicker = 0;
 			this.spawnParticles();
 		}
