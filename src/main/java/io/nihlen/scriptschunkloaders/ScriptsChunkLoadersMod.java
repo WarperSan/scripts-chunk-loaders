@@ -26,7 +26,7 @@ public class ScriptsChunkLoadersMod implements ModInitializer {
 		// However, some things (like resources) may still be uninitialized.
 		// Proceed with mild caution.
 
-        ScriptsChunkLoadersGameRules.registerAllRules();
+    ScriptsChunkLoadersGameRules.registerAllRules();
 		ServerLifecycleEvents.SERVER_STARTED.register(CHUNK_LOADER_MANAGER::initialize);
 	}
 }
