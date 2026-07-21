@@ -32,7 +32,7 @@ public class ScriptsChunkLoadersGameRules {
     }
     
     /// Defines if the given entity should emit a vibration
-    public static boolean shouldEmitVibrationem(Entity entity) {
+    public static boolean shouldEmitVibration(Entity entity) {
         MinecraftServer server = entity.level().getServer();
 
         if (server == null)
