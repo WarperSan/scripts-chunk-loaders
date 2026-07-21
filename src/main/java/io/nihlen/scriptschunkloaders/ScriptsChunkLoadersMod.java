@@ -23,7 +23,7 @@ public class ScriptsChunkLoadersMod implements ModInitializer {
 	// Add Custom TicketType, Flags are set to mimic FORCED.
 	public static final TicketType CUSTOM_TICKETTYPE_FORCED =  Registry.register(BuiltInRegistries.TICKET_TYPE, ScriptsChunkLoadersMod.MODID, new TicketType(TicketType.NO_TIMEOUT, TicketType.FLAG_PERSIST | TicketType.FLAG_LOADING | TicketType.FLAG_SIMULATION | TicketType.FLAG_KEEP_DIMENSION_ACTIVE));
 
-    public static final GameRule<Boolean> ALWAYS_SHOW_LOADER_NAME = Registry.register(BuiltInRegistries.GAME_RULE, "alwaysShowLoaderName", GameRuleBuilder.forBoolean(true).category(GameRuleCategory.MISC).build());
+    public static final GameRule<Boolean> ALWAYS_SHOW_LOADER_NAME = Registry.register(BuiltInRegistries.GAME_RULE, "always_show_loader_name", GameRuleBuilder.forBoolean(true).category(GameRuleCategory.MISC).build());
 
 	@Override
 	public void onInitialize() {
