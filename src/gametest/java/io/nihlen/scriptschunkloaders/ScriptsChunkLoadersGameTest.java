@@ -47,12 +47,12 @@ import java.util.function.Function;
 *
 * - Minecart unregisters with sculk sensor
 * */
-
+@SuppressWarnings("unused")
 public class ScriptsChunkLoadersGameTest {
     String defaultName = "Chunk Loader";
     String customItemName = "My Custom Item";
-    Integer startLoaderFrequency = 6;
-    Integer stopLoaderFrequency = 5;
+    int startLoaderFrequency = 6;
+    int stopLoaderFrequency = 5;
 
     Function<Entity, String> getCustomName = entity -> {
         var customName = entity.getCustomName();
@@ -376,8 +376,8 @@ public class ScriptsChunkLoadersGameTest {
             if (sensor.getLastVibrationFrequency() != startLoaderFrequency) {
                 throw context.assertionException(pos, String.format(
                         "Expected a vibration frequency of %s, instead got %s",
-                        startLoaderFrequency,
-                        sensor.getLastVibrationFrequency()
+                        (Object) startLoaderFrequency,
+                        (Object) sensor.getLastVibrationFrequency()
                 ));
             }
 
@@ -413,8 +413,8 @@ public class ScriptsChunkLoadersGameTest {
                     if (sensor.getLastVibrationFrequency() != stopLoaderFrequency) {
                         throw context.assertionException(pos, String.format(
                                 "Expected a vibration frequency of %s, instead got %s",
-                                stopLoaderFrequency,
-                                sensor.getLastVibrationFrequency()
+                                (Object) stopLoaderFrequency,
+                                (Object) sensor.getLastVibrationFrequency()
                         ));
                     }
 
