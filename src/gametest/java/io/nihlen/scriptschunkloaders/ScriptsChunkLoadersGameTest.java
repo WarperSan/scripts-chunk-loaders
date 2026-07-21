@@ -362,7 +362,7 @@ public class ScriptsChunkLoadersGameTest {
 
     /// Checks if the sculk sensor receives the correct vibration on activation
     @GameTest(structure = "scl_tests:sculk_activate")
-    public void registerWithResonance(GameTestHelper context) {
+    public void registerWithVibration(GameTestHelper context) {
         clearTest(context);
 
         context.spawn(EntityTypes.MINECART, 2, 1, 2);
@@ -393,7 +393,7 @@ public class ScriptsChunkLoadersGameTest {
 
     /// Checks if the sculk sensor receives the correct vibration on deactivation
     @GameTest(structure = "scl_tests:sculk_activate")
-    public void unregisterWithResonance(GameTestHelper context) {
+    public void unregisterWithVibration(GameTestHelper context) {
         clearTest(context);
 
         context.spawn(EntityTypes.MINECART, 2, 1, 2);
