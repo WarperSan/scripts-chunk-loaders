@@ -2,12 +2,14 @@ package io.nihlen.scriptschunkloaders;
 
 import it.unimi.dsi.fastutil.longs.LongSet;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.minecraft.entity.Entity;
-import net.minecraft.registry.RegistryKey;
+import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.Ticket;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.World;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 
 import java.util.*;
 
@@ -17,7 +19,7 @@ public class ChunkLoaderManager {
 
     private boolean initialized = false;
     private final Set<Entity> pendingRegistrations = new HashSet<>();
-    public HashMap<RegistryKey<World>, HashMap<Long, List<UUID>>> forceLoadedChunks = new HashMap<>();
+    public HashMap<ResourceKey<Level>, HashMap<Long, List<UUID>>> forceLoadedChunks = new HashMap<>();
 
     public void initialize(MinecraftServer _server) {
         server = _server;
@@ -30,7 +32,7 @@ public class ChunkLoaderManager {
     }
 
     private void handlePendingRegistrations () {
-        ScriptsChunkLoadersMod.LOGGER.info("Handling pending registrations");
+        ScriptsChunkLoadersMod.LOGGER.debug("Handling pending registrations");
         pendingRegistrations.forEach(this::registerChunkLoader);
         pendingRegistrations.clear();
     }
@@ -41,25 +43,25 @@ public class ChunkLoaderManager {
             return;
         }
 
-        var chunkPos = entity.getChunkPos();
+        var chunkPos = entity.chunkPosition();
 
         removeChunkLoader(entity);
-        ScriptsChunkLoadersMod.LOGGER.info("Adding {} to {}", entity, entity.getWorld().getRegistryKey().getValue());
+        ScriptsChunkLoadersMod.LOGGER.debug("Adding {} to {}", entity, entity.level().dimension().identifier());
 
-        var worldRegistryKey = entity.getWorld().getRegistryKey();
+        var worldRegistryKey = entity.level().dimension();
         var worldChunks = forceLoadedChunks.computeIfAbsent(worldRegistryKey, s -> new HashMap<>());
-        var list = worldChunks.computeIfAbsent(chunkPos.toLong(), s -> new ArrayList<>());
-        list.add(entity.getUuid());
+        var list = worldChunks.computeIfAbsent(chunkPos.pack(), s -> new ArrayList<>());
+        list.add(entity.getUUID());
     }
 
     public void removeChunkLoader(Entity entity) {
-        ScriptsChunkLoadersMod.LOGGER.info("Removing {} from {}", entity, entity.getWorld().getRegistryKey().getValue());
-        var uuid = entity.getUuid();
+        ScriptsChunkLoadersMod.LOGGER.debug("Removing {} from {}", entity, entity.level().dimension().identifier());
+        var uuid = entity.getUUID();
 
-        var worldRegistryKey = entity.getWorld().getRegistryKey();
+        var worldRegistryKey = entity.level().dimension();
         var worldChunks = forceLoadedChunks.get(worldRegistryKey);
 
-        ScriptsChunkLoadersMod.LOGGER.info("worldChunks {}", worldChunks);
+        ScriptsChunkLoadersMod.LOGGER.debug("worldChunks {}", worldChunks);
         if (worldChunks == null) return;
 
         var iterator = worldChunks.entrySet().iterator();
@@ -75,8 +77,8 @@ public class ChunkLoaderManager {
     }
 
     private void setupTimer() {
-        ServerTickEvents.END_WORLD_TICK.register((world) -> {
-            var time = world.getTime();
+        ServerTickEvents.END_LEVEL_TICK.register((world) -> {
+            var time = world.getGameTime();
             if (time != lastTick && time % 20 == 0) {
                 lastTick = time;
                 updateWorlds();
@@ -86,45 +88,46 @@ public class ChunkLoaderManager {
 
     private void updateWorlds() {
         forceLoadedChunks.keySet().forEach(worldRegistryKey -> {
-            ServerWorld world = server.getWorld(worldRegistryKey);
+            ServerLevel world = server.getLevel(worldRegistryKey);
             updateChunkLoaders(world);
         });
     }
 
-    private void updateChunkLoaders(ServerWorld world) {
+    private void updateChunkLoaders(ServerLevel world) {
         var currentChunks = calculateLoadedChunks(world);
 
         // TODO: This can probably be optimized. We're looping over the same range twice since there usually is an
         //  overlap between the current chunks and the loaded chunks.
 
-        final LongSet loadedChunks = world.getForcedChunks();
+        final LongSet loadedChunks = world.getForceLoadedChunks();
 
         currentChunks.forEach(chunkPos -> {
-            long longPos = chunkPos.toLong();
+            long longPos = chunkPos.pack();
 
             if (!loadedChunks.contains(longPos)) {
                 // Load chunk
-                world.setChunkForced(chunkPos.x, chunkPos.z, true);
+                var ticket = new Ticket(ScriptsChunkLoadersMod.CUSTOM_TICKETTYPE_FORCED, ChunkMap.FORCED_TICKET_LEVEL);
+                world.getChunkSource().addTicket(ticket, chunkPos);
             }
         });
 
         loadedChunks.forEach(longPos -> {
-            var chunkPos = new ChunkPos(longPos);
+            var chunkPos = ChunkPos.unpack(longPos);
             if (!currentChunks.contains(chunkPos)) {
                 // Unload chunk
-                world.setChunkForced(chunkPos.x, chunkPos.z, false);
+                world.getChunkSource().removeTicketWithRadius(ScriptsChunkLoadersMod.CUSTOM_TICKETTYPE_FORCED, chunkPos, 2);
             }
         });
     }
 
-    private Set<ChunkPos> calculateLoadedChunks (ServerWorld world) {
+    private Set<ChunkPos> calculateLoadedChunks (ServerLevel world) {
         Set<ChunkPos> chunks = new HashSet<>();
 
-        var worldChunks = forceLoadedChunks.get(world.getRegistryKey());
+        var worldChunks = forceLoadedChunks.get(world.dimension());
 
         if (worldChunks != null) {
             worldChunks.keySet().forEach(chunkPosLong -> {
-                var chunkPos = new ChunkPos(chunkPosLong);
+                var chunkPos = ChunkPos.unpack(chunkPosLong);
                 var surroundingChunks = buildChunkSquare(chunkPos);
                 chunks.addAll(Arrays.asList(surroundingChunks));
             });
@@ -139,7 +142,7 @@ public class ChunkLoaderManager {
         for (int i = 0; i < 9; i++) {
             var xOffset = i % 3 - 1;
             var zOffset = i / 3 - 1;
-            chunks[i] = new ChunkPos(chunkPos.x + xOffset, chunkPos.z + zOffset);
+            chunks[i] = new ChunkPos(chunkPos.x() + xOffset, chunkPos.z() + zOffset);
         }
 
         return chunks;
