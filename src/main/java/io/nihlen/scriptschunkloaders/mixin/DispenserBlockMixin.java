@@ -1,6 +1,7 @@
 package io.nihlen.scriptschunkloaders.mixin;
 
 import io.nihlen.scriptschunkloaders.MinecartEntityExt;
+import io.nihlen.scriptschunkloaders.ScriptsChunkLoadersGameRules;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.BlockEntityTypes;
@@ -73,9 +74,9 @@ public class DispenserBlockMixin {
     @Unique
     private Item[] getPattern(Item centerItem) {
         return new Item[]{
-                Items.AIR,            Items.AMETHYST_SHARD, Items.AIR,
-                Items.AMETHYST_SHARD, centerItem,           Items.AMETHYST_SHARD,
-                Items.AIR,            Items.AMETHYST_SHARD, Items.AIR
+                Items.AIR, Items.AMETHYST_SHARD, Items.AIR,
+                Items.AMETHYST_SHARD, centerItem, Items.AMETHYST_SHARD,
+                Items.AIR, Items.AMETHYST_SHARD, Items.AIR
         };
     }
 
@@ -97,7 +98,7 @@ public class DispenserBlockMixin {
         List<AbstractMinecart> list = level.getEntitiesOfClass(AbstractMinecart.class, new AABB(blockPos), EntitySelector.ENTITY_STILL_ALIVE);
 
         for (AbstractMinecart entity : list) {
-            MinecartEntityExt cart = (MinecartEntityExt)entity;
+            MinecartEntityExt cart = (MinecartEntityExt) entity;
 
             switch (action) {
                 case "toggle" -> this.toggleCart(level, entity, cart);
@@ -120,12 +121,18 @@ public class DispenserBlockMixin {
     private void startCart(ServerLevel level, AbstractMinecart entity, MinecartEntityExt cart) {
         cart.scripts_chunk_loaders$startChunkLoader();
         cart.scripts_chunk_loaders$setChunkLoaderNameFromInventory();
-        level.gameEvent(entity, GameEvent.RESONATE_6, entity.position());
+
+        if (ScriptsChunkLoadersGameRules.shouldEmitVibration(entity)) {
+            level.gameEvent(entity, GameEvent.RESONATE_6, entity.position());
+        }
     }
 
     @Unique
     private void stopCart(ServerLevel level, AbstractMinecart entity, MinecartEntityExt cart) {
         cart.scripts_chunk_loaders$stopChunkLoader();
-        level.gameEvent(entity, GameEvent.RESONATE_5, entity.position());
+
+        if (ScriptsChunkLoadersGameRules.shouldEmitVibration(entity)) {
+            level.gameEvent(entity, GameEvent.RESONATE_5, entity.position());
+        }
     }
 }

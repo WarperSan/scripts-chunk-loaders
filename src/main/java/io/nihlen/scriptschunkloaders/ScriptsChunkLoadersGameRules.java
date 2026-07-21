@@ -12,14 +12,16 @@ import net.minecraft.world.level.gamerules.GameRuleCategory;
 @SuppressWarnings("unused")
 public class ScriptsChunkLoadersGameRules {
     private static GameRule<Boolean> ALWAYS_SHOW_LOADER_NAME;
+    private static GameRule<Boolean> EMIT_VIBRATION_ON_LOADER_CHANGE;
 
     /// Registers all the rules of this mod
     /// @implNote Work around for not instantiating it
     public static void registerAllRules() {
         ALWAYS_SHOW_LOADER_NAME = Registry.register(BuiltInRegistries.GAME_RULE, "always_show_loader_name", GameRuleBuilder.forBoolean(true).category(GameRuleCategory.MISC).build());
+        EMIT_VIBRATION_ON_LOADER_CHANGE = Registry.register(BuiltInRegistries.GAME_RULE, "emit_vibration_on_loader_change", GameRuleBuilder.forBoolean(true).category(GameRuleCategory.MISC).build());
     }
 
-    /// Defines if the given entity should always show its custom name or not
+    /// Defines if the given entity should always show its custom name
     public static boolean shouldAlwaysShowCustomName(Entity entity) {
         MinecraftServer server = entity.level().getServer();
 
@@ -27,5 +29,15 @@ public class ScriptsChunkLoadersGameRules {
             return true;
 
         return server.getGameRules().get(ALWAYS_SHOW_LOADER_NAME);
+    }
+    
+    /// Defines if the given entity should emit a vibration
+    public static boolean shouldEmitVibrationem(Entity entity) {
+        MinecraftServer server = entity.level().getServer();
+
+        if (server == null)
+            return true;
+
+        return server.getGameRules().get(EMIT_VIBRATION_ON_LOADER_CHANGE);
     }
 }
